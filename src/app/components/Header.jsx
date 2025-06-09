@@ -1,7 +1,7 @@
-'use client';
+
 import { FaSearch } from 'react-icons/fa';
 import Link from 'next/link';
-
+import { SignedIn, SignedOut, UserButton } from '@clerk/nextjs';
 export default function Header() {
   return (
     <header className='bg-slate-200 shadow-md'>
@@ -33,11 +33,16 @@ export default function Header() {
               About
             </li>
           </Link>
-          <Link href='/sign-in'>
-            <li className='hidden md:inline text-slate-700 hover:underline'>
-              Sign In
-            </li>
-          </Link>
+          <SignedIn>
+            <UserButton />
+          </SignedIn>
+          <SignedOut>
+            <Link href='/sign-in'>
+              <li className='hidden md:inline text-slate-700 hover:underline'>
+                Sign In
+              </li>
+            </Link>
+          </SignedOut>
         </ul>
       </div>
     </header>
