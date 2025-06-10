@@ -1,7 +1,10 @@
 // app/api/webhooks/route.js
-
+console.log("hello");
 import { Webhook } from 'svix';
 import { NextResponse } from 'next/server';
+if (!WEBHOOK_SECRET) {
+  throw new Error('Missing Clerk Webhook Secret');
+}
 
 const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET;
 
