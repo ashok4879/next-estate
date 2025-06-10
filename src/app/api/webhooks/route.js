@@ -1,27 +1,37 @@
-import { verifyWebhook } from '@clerk/nextjs/webhooks'
+// app/api/webhooks/route.js
+
+import { Webhook } from 'svix';
+import { NextResponse } from 'next/server';
+
+const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET;
+
 export async function POST(req) {
   try {
-    const rawBody = await req.text(); 
-    const evt = await verifyWebhook({
-      req,
-      rawBody,
+    const payload = await req.text();
+    const headers = req.headers;
+
+    const svixId = headers.get('svix-id');
+    const svixTimestamp = headers.get('svix-timestamp');
+    const svixSignature = headers.get('svix-signature');
+
+    if (!svixId || !svixTimestamp || !svixSignature) {
+      console.error('Missing Svix headers');
+      return NextResponse.json({ error: 'Missing Svix headers' }, { status: 400 });
+    }
+
+    const wh = new Webhook(WEBHOOK_SECRET);
+    const evt = wh.verify(payload, {
+      'svix-id': svixId,
+      'svix-timestamp': svixTimestamp,
+      'svix-signature': svixSignature,
     });
-    const eventType = evt.type;
-    if (eventType === 'session.created') {
-      console.log(`User signed in: ${evt.data.user_id}`);
-    }
-    if (eventType === 'user.created') {
-      console.log("user created");
-    }
-    if (eventType === 'user.deleted') {
-      console.log("user deleted");
-    }
-    if (eventType === 'user.updated') {
-      console.log("user updated");
-    }
-    return new Response('Webhook received', { status: 200 });
+
+    console.log('✅ Verified webhook:', evt.type);
+    console.log('Event data:', evt.data);
+
+    return NextResponse.json({ success: true });
   } catch (err) {
-    console.error('Error verifying webhook:', err);
-    return new Response('Error verifying webhook', { status: 400 });
+    console.error('❌ Webhook verification failed:', err.message);
+    return NextResponse.json({ error: 'Webhook verification failed' }, { status: 400 });
   }
 }
