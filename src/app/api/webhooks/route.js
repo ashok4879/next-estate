@@ -2,12 +2,10 @@
 console.log("hello");
 import { Webhook } from 'svix';
 import { NextResponse } from 'next/server';
+const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET;
 if (!WEBHOOK_SECRET) {
   throw new Error('Missing Clerk Webhook Secret');
 }
-
-const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET;
-
 export async function POST(req) {
   try {
     const payload = await req.text();
